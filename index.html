@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leis da Termodinâmica - Transformação de Calor em Trabalho</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="fixed-frame">
+        <span class="site-title">Leis da Termodinâmica</span>
+        <span class="credits">Produzido por Flávio E. S. da Cunha | <a href="mailto:flavioescunha@gmail.com">flavioescunha@gmail.com</a></span>
+    </div>
+    <div class="container">
+        <header style="text-align: left;">
+            <h1>1. O Calor Vira Trabalho</h1>
+            <p>Ao receber calor, o gás (vapor d'água) dilata e empurra o peso em cima do êmbolo que o está aprisionando no cilindro. Clique no <strong>fole</strong> para soprar o fogo e acelerar esse processo!</p>
+        </header>
+        
+        <main class="simulation-area">
+            <div class="bellows-container" id="blowerBtn" title="Clique para soprar">
+                <svg viewBox="0 0 200 200" class="bellows-svg">
+                    <!-- Folds / Sanfona -->
+                    <path class="fold" d="M 80 80 Q 60 100 80 120" fill="none" stroke="#94a3b8" stroke-width="3"/>
+                    <path class="fold" d="M 100 85 Q 80 100 100 115" fill="none" stroke="#94a3b8" stroke-width="3"/>
+                    <path class="fold" d="M 120 90 Q 100 100 120 110" fill="none" stroke="#94a3b8" stroke-width="3"/>
+                    <path class="fold" d="M 140 94 Q 120 100 140 106" fill="none" stroke="#94a3b8" stroke-width="3"/>
+                    
+                    <!-- Top Part -->
+                    <g class="bellows-top">
+                        <line x1="20" y1="50" x2="80" y2="75" stroke="#f1f5f9" stroke-width="6" stroke-linecap="round" />
+                        <polygon points="75,70 160,95 75,100" fill="#334155" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/>
+                    </g>
+                    
+                    <!-- Bottom Part -->
+                    <g class="bellows-bottom">
+                        <line x1="20" y1="150" x2="80" y2="125" stroke="#f1f5f9" stroke-width="6" stroke-linecap="round" />
+                        <polygon points="75,130 160,105 75,100" fill="#334155" stroke="#cbd5e1" stroke-width="2" stroke-linejoin="round"/>
+                    </g>
+
+                    <!-- Nozzle / Bico -->
+                    <polygon points="160,95 185,98 185,102 160,105" fill="#64748b" stroke="#f1f5f9" stroke-width="2" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            
+            <div class="machine">
+                <div class="cylinder">
+                    <div class="steam" id="steam">
+                        <div class="particle p1"></div>
+                        <div class="particle p2"></div>
+                        <div class="particle p3"></div>
+                        <div class="particle p4"></div>
+                        <div class="particle p5"></div>
+                    </div>
+                    <div class="moving-parts" id="movingParts">
+                        <div class="weight">100kg</div>
+                        <div class="piston"></div>
+                    </div>
+                    <div class="water" id="water"></div>
+                </div>
+                
+                <div class="furnace">
+                    <div class="fire-glow" id="fireGlow"></div>
+                    <div class="fire" id="fire"></div>
+                </div>
+            </div>
+        </main>
+        
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="label">Calor:</span>
+                <div class="bar-bg"><div class="bar-fill heat-bar" id="heatBar"></div></div>
+            </div>
+            <div class="status-item">
+                <span class="label">Pressão (Vapor):</span>
+                <div class="bar-bg"><div class="bar-fill pressure-bar" id="pressureBar"></div></div>
+            </div>
+        </div>
+
+        <section class="formula-section">
+            <h2>Cálculo do Trabalho</h2>
+            <p>Veja como calcular o trabalho realizado por um gás ao receber calor:</p>
+            <img src="trabalho.png" alt="Esquema do Trabalho" class="formula-img" onerror="this.style.display='none'">
+            
+            <div class="formulas-container">
+                <div class="formula-box">
+                    <strong>Fórmulas Iniciais:</strong><br>
+                    <span class="math"><span class="var-tooltip" data-meaning="Trabalho (Joules)">τ</span> = <span class="var-tooltip" data-meaning="Força (Newtons)">F</span> &middot; <span class="var-tooltip" data-meaning="Deslocamento (metros)">d</span></span> (Trabalho = Força x distância)<br>
+                    <span class="math">
+                        <span class="var-tooltip" data-meaning="Pressão (Pascals)">p</span> = 
+                        <div class="frac">
+                            <span class="num var-tooltip" data-meaning="Força (Newtons)">F</span>
+                            <span class="den var-tooltip" data-meaning="Área da Base (m²)">A</span>
+                        </div>
+                    </span> (Pressão = Força / Área)<br>
+                    <span class="math"><span class="var-tooltip" data-meaning="Variação de Volume (m³)">ΔV</span> = <span class="var-tooltip" data-meaning="Área da Base (m²)">A</span> &middot; <span class="var-tooltip" data-meaning="Altura (metros)">h</span></span> (Variação de Volume = Área x altura)
+                </div>
+                
+                <div class="steps-container" id="stepsContainer">
+                    <div class="step-box">
+                        <strong>Passo 1:</strong> A distância <em>d</em> que o êmbolo se move é a altura <em>h</em>.<br>
+                        <span class="math">τ = F &middot; d &rarr; τ = F &middot; h</span>
+                    </div>
+                    <div class="step-box">
+                        <strong>Passo 2:</strong> Isolando a Força (F) na fórmula de pressão.<br>
+                        <div class="anim-container">
+                            <span>
+                                p = 
+                                <div class="frac" style="margin-right: 1.5rem;">
+                                    <span class="num">F</span>
+                                    <span class="den" style="position: relative;">
+                                        A
+                                        <span class="var-moving anim-move-up-left fade-out-delayed" style="position: absolute; left: 0; top: 0; color: #fbbf24; text-shadow: 0 0 5px #fbbf24;">A</span>
+                                    </span>
+                                </div>
+                            </span>
+                            
+                            <span class="fade-in-delayed"> &rarr; F = p &middot; <span style="color: #fbbf24;">A</span></span>
+                        </div>
+                    </div>
+                    <div class="step-box">
+                        <strong>Passo 3:</strong> Isolando a Área (A) na fórmula de volume. (O <em>h</em> que multiplica passa dividindo)<br>
+                        <div class="anim-container">
+                            <span>
+                                ΔV = A &middot; 
+                                <span style="position: relative;">
+                                    h
+                                    <span class="var-moving anim-move-down-left fade-out-delayed" style="position: absolute; left: 0; top: 0; color: #10b981; text-shadow: 0 0 5px #10b981;">h</span>
+                                </span>
+                            </span>
+                            
+                            <span class="fade-in-delayed" style="margin-left: 1.5rem;">
+                                &rarr; A = 
+                                <div class="frac">
+                                    <span class="num">ΔV</span>
+                                    <span class="den" style="color: #10b981;">h</span>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="step-box">
+                        <strong>Passo 4:</strong> Substituindo a Área na equação da Força.<br>
+                        <div class="anim-container">
+                            <span>F = p &middot; <span style="color:#fbbf24;">A</span></span>
+                            <span class="fade-in-delayed" style="margin-left: 1rem;">
+                                &rarr; F = p &middot; 
+                                <div class="frac" style="color: #fbbf24;">
+                                    <span class="num">ΔV</span>
+                                    <span class="den">h</span>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="step-box final-step" style="text-align: center;">
+                        <strong>Passo 5 (Final):</strong> Substituindo a Força na equação do Trabalho.<br>
+                        <div class="anim-container" style="flex-direction: column; gap: 0.5rem; align-items: center; justify-content: center; background: transparent; width: 100%;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span class="math">τ = <span style="color:#38bdf8;">F</span> &middot; h</span>
+                                <span class="math fade-in-delayed">
+                                    &rarr; τ = [<span style="color:#38bdf8;">p &middot; 
+                                    <div class="frac">
+                                        <span class="num">ΔV</span>
+                                        <span class="den">h</span>
+                                    </div></span>] &middot; h
+                                </span>
+                            </div>
+                            <span class="fade-in-delayed" style="font-size: 1rem; color: #cbd5e1; margin-top: 1rem; font-weight: normal; font-family: 'Inter', sans-serif;">
+                                Como o <em>h</em> dividindo e multiplicando se anulam:
+                            </span>
+                            <div class="fade-in-delayed" style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                                <span class="math result" style="margin-top: 0;">
+                                    <span class="var-tooltip" data-meaning="Trabalho (Joules)">τ</span> = 
+                                    <span class="var-tooltip" data-meaning="Pressão (Pascals)">p</span> &middot; 
+                                    <span class="var-tooltip" data-meaning="Variação de Volume (m³)">ΔV</span>
+                                </span>
+                                <span style="color: #fca5a5; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px;">Trabalho do Gás</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons" style="display: flex; gap: 1rem; align-items: center; justify-content: center; margin-top: 1rem;">
+                    <button id="prevStepBtn" class="action-btn" style="background: linear-gradient(135deg, #64748b, #475569); border-color: #94a3b8; display: none;">&larr; Voltar</button>
+                    <button id="nextStepBtn" class="action-btn">Mostrar Próximo Passo</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Tópico 2: 1ª Lei da Termodinâmica -->
+    <div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+        <header style="text-align: left;">
+            <h1>2. A Primeira Lei da Termodinâmica</h1>
+            <p>O princípio da conservação de energia aplicado aos gases.</p>
+        </header>
+
+        <section class="analogy-section" style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: left;">
+            <strong style="font-size: 1.2rem; align-self: flex-start; margin-bottom: -0.5rem; color: #cbd5e1; width: 100%; max-width: 700px; text-align: left;">Analise esse quadrinho:</strong>
+            <img src="charge.png" alt="Analogia Financeira" style="width: 100%; max-width: 700px; border-radius: 8px; box-shadow: 0 0 15px rgba(0,0,0,0.5);" onerror="this.style.display='none'">
+            <div class="formula-box" style="border-left-color: #fb923c; max-width: 700px;">
+                <strong>A Analogia do Dinheiro:</strong><br>
+                Imagine que um menino sai de casa com <strong>R$&nbsp;100</strong> na carteira. Ele vai à padaria e <strong>gasta R$&nbsp;20</strong>, mas logo em seguida encontra um parente que lhe <strong>dá R$&nbsp;50</strong> de presente. 
+                <br><br>
+                Seu dinheiro variou <strong>+R$&nbsp;30</strong> (pois ganhou 50 e perdeu 20), e ele volta para casa com <strong>R$&nbsp;130</strong>.
+                <br><br>
+                <strong>Na Termodinâmica, acontece exatamente a mesma coisa com o gás, mas trocando Reais por Joules de energia!</strong>
+                <ul style="text-align: left; margin-bottom: 0;">
+                    <li><strong>Energia Interna Inicial (<span class="math">U<sub>inicial</sub></span>):</strong> O saldo de energia que o gás já tem.</li>
+                    <li><strong>Calor (<span class="math">Q</span>):</strong> A energia recebida do ambiente (o presente).</li>
+                    <li><strong>Trabalho (<span class="math">τ</span>):</strong> A energia gasta para expandir o gás (a despesa).</li>
+                    <li><strong>Energia Interna Final (<span class="math">U<sub>final</sub></span>):</strong> O saldo de energia com que o gás termina o processo (o que restou na carteira).</li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="simulation-area" style="margin-top: 3rem; flex-direction: column; align-items: center;">
+            <div class="cylinder-1st-law">
+                <!-- Seta de calor Q -->
+                <div class="arrow-q" id="arrowQ">
+                    <span class="symbol">Q</span>
+                    <div class="arrow-body"></div>
+                    <div class="arrow-head"></div>
+                </div>
+
+                <!-- Cilindro -->
+                <div class="cylinder-body-1st-law">
+                    <span style="position: absolute; bottom: 15px; color: rgba(255, 255, 255, 0.4); font-weight: 800; letter-spacing: 3px; text-transform: uppercase;">Gás</span>
+                    <!-- Nuvem (Gás) -->
+                    <div class="gas-cloud" id="gasCloud">
+                        <span class="u-label" id="uLabel">U<sub>inicial</sub></span>
+                    </div>
+                </div>
+
+                <!-- Êmbolo -->
+                <div class="piston-1st-law" id="piston1stLaw">
+                    <!-- Seta de Trabalho Tau -->
+                    <div class="arrow-tau" id="arrowTau">
+                        <span class="symbol">τ</span>
+                        <div class="arrow-head-up"></div>
+                        <div class="arrow-body-up"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fórmula Final -->
+            <div style="margin-top: 4rem; text-align: center;">
+                <span class="math result">
+                    <span class="var-tooltip" data-meaning="Variação da Energia Interna (Joules)">ΔU</span> = 
+                    <span class="var-tooltip" data-meaning="Calor Absorvido (Joules)">Q</span> &minus; 
+                    <span class="var-tooltip" data-meaning="Trabalho Realizado (Joules)">τ</span>
+                </span>
+                <div style="color: #fca5a5; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; margin-top: 1.5rem;">A Primeira Lei</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Tópico 3: 2ª Lei da Termodinâmica -->
+    <div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+        <header style="text-align: left;">
+            <h1>3. A Segunda Lei da Termodinâmica</h1>
+            <p>Nenhuma máquina térmica possui 100% de rendimento.</p>
+        </header>
+
+        <section class="analogy-section" style="display: flex; flex-direction: column; align-items: center; gap: 1.5rem; text-align: left;">
+            <div class="formula-box" style="border-left-color: #ef4444; max-width: 800px;">
+                <strong>O Preço de Funcionar:</strong><br>
+                Quando uma máquina transforma calor em trabalho, uma parte do calor se <strong>perde obrigatoriamente</strong> para o ambiente. 
+                Isso ocorre porque o fluxo de calor só existe se houver uma diferença de temperatura (do mais quente para o mais frio). 
+                <br><br>
+                Se a máquina aproveitasse todo o calor (100%), ela não rejeitaria calor para a fonte fria, o que contraria as leis da física. Portanto, a energia que entra (Calor Quente) é <strong>sempre maior</strong> que a energia útil gerada (Trabalho).
+            </div>
+        </section>
+
+        <section class="simulation-area" style="margin-top: 3rem; flex-direction: row; align-items: center; gap: 60px;">
+            <div class="machine-2nd-law" id="machine2ndLaw">
+                <!-- Engrenagem e Manivela -->
+                <div class="gear-system">
+                    <div class="gear" id="gear">
+                        ⚙️
+                        <div class="crank-pin"></div>
+                    </div>
+                </div>
+
+                <!-- Cilindro -->
+                <div class="cylinder-2nd-law">
+                    <!-- Rótulo -->
+                    <div style="position: absolute; top: 10px; left: 15px; color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: bold; letter-spacing: 2px; z-index: 20; pointer-events: none; text-shadow: 0 0 5px black;">CILINDRO</div>
+                    
+                    <!-- Vapor Interno (Cilindro) -->
+                    <div class="internal-steam cylinder-steam"></div>
+
+                    <!-- Calor Irradiado (Paredes) -->
+                    <div class="radiating-heat left">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    <div class="radiating-heat right">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+
+                    <!-- Válvula de Escape Lateral (Portinha) -->
+                    <div class="valve-container">
+                        <div class="valve-door" id="valve"></div>
+                        <!-- Vapor e Setas de Calor Perdido -->
+                        <div class="steam-exhaust" id="steamExhaust">
+                            <div class="steam-cloud-part"></div>
+                            <div class="steam-cloud-part"></div>
+                            <div class="heat-out-arrows" id="heatOutArrows">
+                                <span class="symbol-small">Q<sub>frio</sub></span>
+                                <div class="arrow-out"></div>
+                                <div class="arrow-out"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Êmbolo e Biela -->
+                    <div class="piston-2nd-law" id="piston2ndLaw">
+                        <div class="biela" id="biela"></div>
+                        <!-- Setas de Trabalho (tau) -->
+                        <div class="work-arrows-up" id="workArrows">
+                            <span class="symbol-small">τ</span>
+                            <div class="arrow-up-small"></div>
+                            <div class="arrow-up-small"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caldeira com água -->
+                <div class="boiler-2nd-law">
+                    <!-- Rótulo -->
+                    <div style="position: absolute; bottom: 10px; right: 15px; color: rgba(255,255,255,0.7); font-size: 1rem; font-weight: bold; letter-spacing: 2px; z-index: 20; pointer-events: none; text-shadow: 0 0 5px black;">CALDEIRA</div>
+
+                    <div class="water-2nd-law"></div>
+                    <!-- Vapor Interno (Caldeira) -->
+                    <div class="internal-steam boiler-steam"></div>
+                    <!-- Setas de Calor Recebido (Q_quente) -->
+                    <div class="heat-in-arrows" id="heatInArrows">
+                        <span class="symbol-small" style="color: #ef4444;">Q<sub>quente</sub></span>
+                        <div class="arrow-up-red"></div>
+                        <div class="arrow-up-red"></div>
+                        <div class="arrow-up-red"></div>
+                        <div class="arrow-up-red"></div>
+                        <div class="arrow-up-red"></div>
+                    </div>
+                </div>
+
+                <!-- Fogo Constante Melhorado -->
+                <div class="constant-fire">
+                    <div class="fire-flame flame-1"></div>
+                    <div class="fire-flame flame-2"></div>
+                    <div class="fire-flame flame-3"></div>
+                </div>
+            </div>
+
+            <button id="toggleMachineBtn" class="action-btn" style="background: linear-gradient(135deg, #ef4444, #dc2626); border-color: #f87171;">Ligar Máquina</button>
+        </section>
+
+        <!-- Fórmulas e Imagem 2aLei -->
+        <section class="formula-section" style="margin-top: 1.5rem;">
+            <p style="color: #cbd5e1; font-size: 1.2rem; margin-bottom: 1rem; text-align: center;"><strong>Resumo do Funcionamento:</strong> A máquina extrai calor da fonte quente, converte parte em trabalho e rejeita o resto para a fonte fria.</p>
+            <img src="2aLei.png" alt="Esquema da 2ª Lei da Termodinâmica" class="formula-img" style="max-width: 100%; border-radius: 8px; margin-bottom: 3rem;">
+            
+            <div style="display: flex; gap: 3rem; justify-content: center; flex-wrap: wrap; width: 100%;">
+                
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <span style="color: #94a3b8; font-size: 1.1rem; font-weight: 600;">O Trabalho Útil (τ) gerado:</span>
+                    <div class="math result" style="margin-top: 0; padding: 1.5rem 2.5rem; font-size: 3rem;">
+                        τ = Q<sub>quente</sub> - Q<sub>frio</sub>
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <span style="color: #94a3b8; font-size: 1.1rem; font-weight: 600;">O Rendimento (η) da máquina:</span>
+                    <div class="math result" style="margin-top: 0; padding: 1.5rem 2.5rem; font-size: 3rem; display: inline-flex; align-items: center; gap: 15px;">
+                        η = 
+                        <div style="display: inline-flex; flex-direction: column; align-items: center; font-size: 2.2rem; margin-top: -10px;">
+                            <span style="border-bottom: 4px solid #fca5a5; padding: 0 30px 8px 30px;">τ</span>
+                            <span style="padding-top: 8px;">Q<sub>quente</sub></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div> <!-- Fim do Tópico 3 -->
+
+    <!-- Tópico 4: Exercícios -->
+    <div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+        <header style="text-align: left;">
+            <h1>4. Pratique o que você aprendeu!</h1>
+        </header>
+        
+        <section class="topic-section" style="margin-top: 2rem;">
+            
+            <div class="warning-box">
+                <strong>Atenção:</strong> Tente resolver as questões em um papel antes de clicar no botão para ver a resposta. A prática ativa é o segredo do aprendizado!
+            </div>
+
+            <!-- Exercício 1: Cálculo do Trabalho -->
+            <div class="exercise-card">
+                <h3>Exercício 1: Trabalho de um Gás</h3>
+                <p>Um gás perfeito sofre uma expansão e seu volume aumenta de <strong>2 m³</strong> para <strong>5 m³</strong> sob uma pressão constante de <strong>200 N/m²</strong>. Qual foi o trabalho (τ) realizado pelo gás?</p>
+                
+                <button class="answer-btn" onclick="toggleAnswer('ans1')">Ver Resposta</button>
+                
+                <div id="ans1" class="answer-content">
+                    <p><strong>Resolução:</strong></p>
+                    <p>Fórmula do trabalho a pressão constante: <span class="math">τ = p · ΔV</span></p>
+                    <p>1. O gás aumentou o volume, logo: <span class="math">ΔV = 5 - 2 = 3 m³</span></p>
+                    <p>2. Substituindo os valores:</p>
+                    <p><span class="math">τ = 200 · 3</span></p>
+                    <p><span class="math">τ = 600 Joules</span></p>
+                </div>
+            </div>
+
+            <!-- Exercício 2: Primeira Lei -->
+            <div class="exercise-card">
+                <h3>Exercício 2: A Primeira Lei da Termodinâmica</h3>
+                <p>Um gás ideal recebe <strong>1000 Joules</strong> de calor (Q) de uma fonte térmica e, ao se expandir, realiza um trabalho (τ) de <strong>400 Joules</strong>. Qual foi a variação da sua Energia Interna (ΔU)?</p>
+                
+                <button class="answer-btn" onclick="toggleAnswer('ans2')">Ver Resposta</button>
+                
+                <div id="ans2" class="answer-content">
+                    <p><strong>Resolução:</strong></p>
+                    <p>A 1ª Lei diz que o saldo é o que entra menos o que sai: <span class="math">ΔU = Q - τ</span></p>
+                    <p>1. Energia que entrou (Calor): <strong>1000 J</strong></p>
+                    <p>2. Energia gasta para expandir (Trabalho): <strong>400 J</strong></p>
+                    <p>Substituindo os valores:</p>
+                    <p><span class="math">ΔU = 1000 - 400</span></p>
+                    <p><span class="math">ΔU = 600 Joules</span></p>
+                    <p><em>(O saldo de energia interna do gás aumentou em 600 Joules!)</em></p>
+                </div>
+            </div>
+
+            <!-- Exercício 3: Segunda Lei -->
+            <div class="exercise-card">
+                <h3>Exercício 3: A Segunda Lei e o Rendimento</h3>
+                <p>Uma máquina térmica recebe <strong>5000 Joules</strong> de calor da sua caldeira (Fonte Quente). No entanto, apenas <strong>2000 Joules</strong> são convertidos em trabalho útil (o resto se perdeu). Qual é o rendimento (η) dessa máquina?</p>
+                
+                <button class="answer-btn" onclick="toggleAnswer('ans3')">Ver Resposta</button>
+                
+                <div id="ans3" class="answer-content">
+                    <p><strong>Resolução:</strong></p>
+                    <p>O rendimento é a porcentagem da energia que virou trabalho útil: <span class="math">η = τ / Q<sub>quente</sub></span></p>
+                    <p>Substituindo os valores:</p>
+                    <p><span class="math">η = 2000 / 5000</span></p>
+                    <p><span class="math">η = 0.4</span></p>
+                    <p>Para transformar em porcentagem, multiplicamos por 100:</p>
+                    <p><span class="math">η = 40%</span></p>
+                    <p><em>(Essa máquina aproveita apenas 40% da energia do fogo. Os outros 60% se perdem como calor para o ambiente!)</em></p>
+                </div>
+            </div>
+
+        </section>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
